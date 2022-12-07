@@ -1,0 +1,9 @@
+basePath: /v1
+host: localhost:8081
+info:
+  contact: {}
+  description: An Authenticator API to generate token
+  title: Authenticator API made with Golang
+  version: "1.0"
+paths: {}
+swagger: "2.0"

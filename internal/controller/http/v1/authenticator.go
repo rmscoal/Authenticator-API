@@ -7,15 +7,17 @@ import (
 	"github.com/rmscoal/Authenticator-API/internal/entity"
 	"github.com/rmscoal/Authenticator-API/internal/usecase"
 	"github.com/rmscoal/Authenticator-API/pkg/logger"
+	"github.com/rmscoal/Authenticator-API/pkg/tokenizer"
 )
 
 type authenticatorRoutes struct {
-	t usecase.User
+	u usecase.User
 	l logger.Interface
+	t tokenizer.Tokenizer
 }
 
-func newAuthenticatorRoutes(handler *echo.Group, t usecase.User, l logger.Interface) {
-	r := &authenticatorRoutes{t, l}
+func newAuthenticatorRoutes(handler *echo.Group, u usecase.User, l logger.Interface, t tokenizer.Tokenizer) {
+	r := &authenticatorRoutes{u, l, t}
 
 	h := handler.Group("/credential")
 	{
@@ -31,7 +33,7 @@ type loginRequest struct {
 type loginResponse struct {
 	Status string   `json:"status"`
 	User   userData `json:"user"`
-	Token  string   `json:"token"`
+	Token  []byte   `json:"token"`
 }
 
 type userData struct {
@@ -52,7 +54,7 @@ func (r *authenticatorRoutes) login(c echo.Context) error {
 	}
 
 	r.l.Info("http - v1 - login - querying user")
-	user, err := r.t.Find(c.Request().Context(),
+	user, err := r.u.Find(c.Request().Context(),
 		entity.User{
 			Username: body.Username,
 			Password: body.Password,
@@ -65,6 +67,11 @@ func (r *authenticatorRoutes) login(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, notFound())
 	}
 
+	token, err := r.t.GenerateFromPassword([]byte(body.Password))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, newError(err))
+	}
+
 	return c.JSON(http.StatusOK, loginResponse{
 		Status: "success",
 		User: userData{
@@ -72,6 +79,6 @@ func (r *authenticatorRoutes) login(c echo.Context) error {
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
 		},
-		Token: "Hello",
+		Token: token,
 	})
 }

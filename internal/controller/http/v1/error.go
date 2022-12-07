@@ -3,6 +3,8 @@ package v1
 import (
 	"net/http"
 	"strings"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Error struct {
@@ -10,23 +12,22 @@ type Error struct {
 	Errors map[string]interface{} `json:"erorrs"`
 }
 
-// func newError(err error) Error {
-// 	e := Error{}
-// 	e.Errors = make(map[string]interface{})
-// 	switch v := err.(type) {
-// 	case *echo.HTTPError:
-// 		e.Code = http.StatusInternalServerError
-// 		e.Errors["message"] = v.Message
-// 		e.Errors["data"] = nil
-// 	default:
-// 		e.Code = http.StatusInternalServerError
-// 		e.Errors["message"] = v.Error()
-// 		e.Errors["type"] = v
-// 		e.Errors["data"] = nil
-// 	}
+func newError(err error) Error {
+	e := Error{}
+	e.Errors = make(map[string]interface{})
+	switch v := err.(type) {
+	case *echo.HTTPError:
+		e.Code = http.StatusInternalServerError
+		e.Errors["message"] = v.Message
+		e.Errors["data"] = nil
+	default:
+		e.Code = http.StatusInternalServerError
+		e.Errors["message"] = v.Error()
+		e.Errors["data"] = nil
+	}
 
-// 	return e
-// }
+	return e
+}
 
 func notFound() Error {
 	e := Error{}

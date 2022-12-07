@@ -14,6 +14,7 @@ import (
 	"github.com/rmscoal/Authenticator-API/pkg/httpserver"
 	"github.com/rmscoal/Authenticator-API/pkg/logger"
 	"github.com/rmscoal/Authenticator-API/pkg/postgres"
+	"github.com/rmscoal/Authenticator-API/pkg/tokenizer"
 )
 
 // Run creates objects via constructors.
@@ -31,9 +32,12 @@ func Run(cfg *config.Config) {
 		repo.New(pg),
 	)
 
+	// Tokenizer
+	t := tokenizer.New(tokenizer.MinCost(cfg.Token.MinCost))
+
 	// HTTP Server
 	handler := echo.New()
-	v1.NewRouter(handler, l, userUseCase)
+	v1.NewRouter(handler, l, userUseCase, *t)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

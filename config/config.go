@@ -9,11 +9,11 @@ import (
 type (
 	// Config -.
 	Config struct {
-		App  `yaml:"app"`
-		HTTP `yaml:"http"`
-		Log  `yaml:"logger"`
-		PG   `yaml:"postgres"`
-		// RMQ  `yaml:"rabbitmq"`
+		App   `yaml:"app"`
+		HTTP  `yaml:"http"`
+		Log   `yaml:"logger"`
+		PG    `yaml:"postgres"`
+		Token `yaml:"token"`
 	}
 
 	// App -.
@@ -36,6 +36,11 @@ type (
 	PG struct {
 		PoolMax int    `env-required:"true" yaml:"pool_max" env:"PG_POOL_MAX"`
 		URL     string `env-required:"true" yaml:"url"      env:"PG_URL"`
+	}
+
+	// Bcrypt
+	Token struct {
+		MinCost int `env-required:"true" yaml:"min_cost" env:"MIN_COST"`
 	}
 )
 

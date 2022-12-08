@@ -39,6 +39,7 @@ func Run(cfg *config.Config) {
 	handler := echo.New()
 	v1.NewRouter(handler, l, userUseCase, *t)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
+	l.Info("HTTP Server started successfully!!")
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)

@@ -61,7 +61,7 @@ func (r *authenticatorRoutes) login(c echo.Context) error {
 		Hasher:    lib.NewSHA(),
 		SecretKey: []byte(os.Getenv("SECRET_KEY_AUTHENTICATOR")),
 	}
-	psw := sha.HashPassword([]byte("Hello"), body.Password)
+	psw := sha.HashPassword(body.Password)
 
 	r.l.Info("http - v1 - login - querying user")
 	user, err := r.u.Find(c.Request().Context(),

@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"hash"
+	"os"
 )
 
 type SHAHasher struct {
@@ -11,11 +12,12 @@ type SHAHasher struct {
 	SecretKey []byte
 }
 
-func NewSHA() hash.Hash {
-	return sha256.New()
-}
+func HashPassword(password string) string {
+	sha := SHAHasher{
+		Hasher:    sha256.New(),
+		SecretKey: []byte(os.Getenv("SECRET_KEY_AUTHENTICATOR")),
+	}
 
-func (sha SHAHasher) HashPassword(password string) string {
 	sha.Hasher.Write([]byte(password))
 	return hex.EncodeToString(sha.Hasher.Sum(sha.SecretKey))
 }

@@ -2,7 +2,6 @@ package v1
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/rmscoal/Authenticator-API/internal/controller/http/v1/lib"
@@ -55,13 +54,8 @@ func (r *authenticatorRoutes) login(c echo.Context) error {
 		return c.JSON(http.StatusUnprocessableEntity, entityError(err))
 	}
 
-	// SHA256 Processes
-	// TODO: Improve memory efficiency
-	sha := lib.SHAHasher{
-		Hasher:    lib.NewSHA(),
-		SecretKey: []byte(os.Getenv("SECRET_KEY_AUTHENTICATOR")),
-	}
-	psw := sha.HashPassword(body.Password)
+	// Hash Password
+	psw := lib.HashPassword(body.Password)
 
 	r.l.Info("http - v1 - login - querying user")
 	user, err := r.u.Find(c.Request().Context(),

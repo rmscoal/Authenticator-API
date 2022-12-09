@@ -1,3 +1,6 @@
 # Ignore all config files
 *.yml
 .env
+
+# VSCode Workspace settings
+.vscode

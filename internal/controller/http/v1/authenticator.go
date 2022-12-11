@@ -23,12 +23,20 @@ func newAuthenticatorRoutes(handler *echo.Group, u usecase.User, l logger.Interf
 	h := handler.Group("/credential")
 	{
 		h.POST("/login", r.login)
+		h.POST("/signup", r.signup)
 	}
 }
 
 type loginRequest struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
+}
+
+type signupRequest struct {
+	Username        string `json:"username" validate:"required,alphanum"`
+	Email           string `json:"email" validate:"required,email"`
+	Password        string `json:"password" validate:"required_with=ConfirmPassword,password,eqfield=ConfirmPassword,min=8"`
+	ConfirmPassword string `json:"confirmPassword"`
 }
 
 type loginResponse struct {
@@ -71,6 +79,7 @@ func (r *authenticatorRoutes) login(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, notFound())
 	}
 
+	// Token generation
 	token, err := r.t.GenerateFromPassword([]byte(body.Password))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, newError(err))
@@ -80,9 +89,37 @@ func (r *authenticatorRoutes) login(c echo.Context) error {
 		Status: "success",
 		User: userData{
 			Username:  user.Username,
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
+			FirstName: user.FirstName.String,
+			LastName:  user.LastName.String,
 		},
 		Token: token,
 	})
+}
+
+func (r *authenticatorRoutes) signup(c echo.Context) error {
+	body := &signupRequest{}
+
+	if err := c.Bind(body); err != nil {
+		return c.JSON(http.StatusBadRequest, badRequest())
+	}
+
+	r.l.Info("http - v1 - signup - validating")
+	if err := c.Validate(body); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, entityError(err))
+	}
+
+	// Hash Password
+	psw := lib.HashPassword(body.Password)
+
+	// TODO: Add custom message for duplicated entry.
+	r.l.Info("http - v1 - signup - inserting data")
+	if err := r.u.Store(c.Request().Context(), entity.User{
+		Username: body.Username,
+		Email:    body.Email,
+		Password: psw,
+	}); err != nil {
+		return c.JSON(http.StatusInternalServerError, newError(err))
+	}
+
+	return c.JSON(http.StatusCreated, nil)
 }

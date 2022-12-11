@@ -44,3 +44,23 @@ func (r *UserRepo) GetUser(ctx context.Context, user entity.User) (entity.User, 
 
 	return e, nil
 }
+
+// StoreUser -.
+func (r *UserRepo) StoreUser(ctx context.Context, user entity.User) error {
+	sql, args, err := r.Builder.
+		Insert("users").
+		Columns("username, pass, email").
+		Values(user.Username, user.Password, user.Email).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("UserRepo - StoreUser - r.Builder: %w", err)
+	}
+
+	_, err = r.Pool.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("UserRepo - StoreUser - r.Pool.Exec: %w", err)
+	}
+
+	return nil
+}

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rmscoal/Authenticator-API/internal/entity"
 )
@@ -27,4 +28,12 @@ func (uc *UserUseCase) Find(ctx context.Context, user entity.User) (entity.User,
 	}
 
 	return user, nil
+}
+
+func (uc *UserUseCase) Store(ctx context.Context, user entity.User) error {
+	if err := uc.repo.StoreUser(ctx, user); err != nil {
+		return fmt.Errorf("UserUseCase - Store - s.repo.StoreUser: %w", err)
+	}
+
+	return nil
 }

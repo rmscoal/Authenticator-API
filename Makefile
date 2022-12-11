@@ -62,10 +62,10 @@ migrate-up: ### migration ups
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
 .PHONY: migrate-up
 
-migrate-force: ### migration ups
+migrate-force: ### migration force | make dirty true to false
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' force '$(version)'
 .PHONY: migrate-force
 
-migrate-down: ### migration ups
+migrate-down: ### migration down | apply all down migrations
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' down
 .PHONY: migrate-down

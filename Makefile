@@ -61,3 +61,11 @@ migrate-create:  ### create new migration
 migrate-up: ### migration ups
 	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
 .PHONY: migrate-up
+
+migrate-force: ### migration ups
+	migrate -path migrations -database '$(PG_URL)?sslmode=disable' force '$(version)'
+.PHONY: migrate-force
+
+migrate-down: ### migration ups
+	migrate -path migrations -database '$(PG_URL)?sslmode=disable' down
+.PHONY: migrate-down

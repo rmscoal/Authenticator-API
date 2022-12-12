@@ -14,6 +14,7 @@ type (
 		Log   `yaml:"logger"`
 		PG    `yaml:"postgres"`
 		Token `yaml:"token"`
+		GRPC  `yaml:"grpc"`
 	}
 
 	// App -.
@@ -41,6 +42,11 @@ type (
 	// Bcrypt
 	Token struct {
 		MinCost int `env-required:"true" yaml:"min_cost" env:"MIN_COST"`
+	}
+
+	// gRPC
+	GRPC struct {
+		URL string `env-required:"true" yaml:"port" env:"GRPC_PORT"`
 	}
 )
 

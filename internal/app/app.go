@@ -11,6 +11,7 @@ import (
 	v1 "github.com/rmscoal/Authenticator-API/internal/controller/http/v1"
 	"github.com/rmscoal/Authenticator-API/internal/usecase"
 	"github.com/rmscoal/Authenticator-API/internal/usecase/repo"
+	"github.com/rmscoal/Authenticator-API/pkg/grpc/server"
 	"github.com/rmscoal/Authenticator-API/pkg/httpserver"
 	"github.com/rmscoal/Authenticator-API/pkg/logger"
 	"github.com/rmscoal/Authenticator-API/pkg/postgres"
@@ -41,6 +42,11 @@ func Run(cfg *config.Config) {
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 	l.Info("HTTP Server started successfully!!")
 
+	grpcServer, err := server.New(l, server.Port(cfg.GRPC.Port))
+	if err != nil {
+		l.Error(fmt.Errorf("cannot start server: %v", err))
+	}
+
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -50,11 +56,18 @@ func Run(cfg *config.Config) {
 		l.Info("app - Run - signal: " + s.String())
 	case err = <-httpServer.Notify():
 		l.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
+	case err = <-grpcServer.Notify():
+		l.Error(fmt.Errorf("app - Run - grpcServer.Notify: %w", err))
 	}
 
 	// Shutdown
 	err = httpServer.Shutdown()
 	if err != nil {
 		l.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
+	}
+
+	err = grpcServer.Shutdown()
+	if err != nil {
+		l.Error(fmt.Errorf("app - Run - grpcServer.Shutdown: %v", err))
 	}
 }

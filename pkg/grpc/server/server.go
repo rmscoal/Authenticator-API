@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net"
 
@@ -13,7 +14,9 @@ var _defaultServerAddress = "50051"
 
 type Server struct {
 	pb.UnimplementedEmailerServer
+	engine *grpc.Server
 	port   string
+	error  chan error
 	logger logger.Interface
 }
 
@@ -23,13 +26,18 @@ func New(l logger.Interface, opts ...Option) (*Server, error) {
 		logger: l,
 	}
 
+	// Custom options
+	for _, opt := range opts {
+		opt(s)
+	}
+
 	s.start()
 
 	return s, nil
 }
 
 func (s *Server) start() {
-	lis, err := net.Listen("tcp", s.port)
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", s.port))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
@@ -39,4 +47,21 @@ func (s *Server) start() {
 	if err := grpc_server.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
+	s.engine = grpc_server
+}
+
+func (s *Server) Notify() <-chan error {
+	return s.error
+}
+
+func (s *Server) Shutdown() error {
+	select {
+	case <-s.error:
+		return nil
+	default:
+	}
+
+	s.engine.GracefulStop()
+
+	return nil
 }

@@ -46,7 +46,7 @@ type (
 
 	// gRPC
 	GRPC struct {
-		URL string `env-required:"true" yaml:"port" env:"GRPC_PORT"`
+		Port string `env-required:"true" yaml:"port" env:"GRPC_PORT"`
 	}
 )
 

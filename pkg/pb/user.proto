@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "github.com/rmscoal/authenticator/internal/entity";
+
+package entity;
+
+// The request to send an email message.
+message RequestEmailer {
+  string name = 1;
+  string email = 2;
+}
+
+message CheckEmailer { bool sent = 1; }
+
+service Emailer {
+  // Send a request for emailer
+  rpc SendEmail(RequestEmailer) returns (CheckEmailer) {}
+}

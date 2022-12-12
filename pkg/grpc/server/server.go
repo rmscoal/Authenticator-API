@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"net"
 
 	"github.com/rmscoal/Authenticator-API/pkg/logger"
@@ -39,13 +38,13 @@ func New(l logger.Interface, opts ...Option) (*Server, error) {
 func (s *Server) start() {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", s.port))
 	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
+		s.logger.Fatal(err, "gRPC failed to listen")
 	}
 	grpc_server := grpc.NewServer()
 	pb.RegisterEmailerServer(grpc_server, s)
-	log.Printf("Server listening at: %v", lis.Addr().String())
+	s.logger.Info("gRPC server listening at: %v", lis.Addr().String())
 	if err := grpc_server.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
+		s.logger.Fatal(err, "gRPC failed to server")
 	}
 	s.engine = grpc_server
 }

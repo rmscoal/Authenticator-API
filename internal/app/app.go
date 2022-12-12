@@ -42,6 +42,7 @@ func Run(cfg *config.Config) {
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 	l.Info("HTTP Server started successfully!!")
 
+	// gRPC Server
 	grpcServer, err := server.New(l, server.Port(cfg.GRPC.Port))
 	if err != nil {
 		l.Error(fmt.Errorf("cannot start server: %v", err))
